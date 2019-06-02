@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "Running anti port-scanning configuration"
+./aportscanning.sh
+
 echo "Running anti brute-force configuration"
 ./abruteforce.sh
 
