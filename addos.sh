@@ -46,7 +46,7 @@ iptables -t mangle -A PREROUTING -m conntrack --ctstate INVALID -j DROP
 iptables -t mangle -A PREROUTING -p tcp ! --syn -m conntrack --ctstate NEW -j DROP
 
 # blokujemy połączenia o niestandardowych wartościach MSS - MSS czyli maximum segment size to parametr nagłówka TCP, który określa największą wartość danych w bajtach, które mogą być przesłane w jednym segmencie połączenia TCP (odpowiednik MTU Maximum Transmission Unit dla datagramów IP, aczkolwiek nie zlicza nagłówka)
-iptables -t mangle -A PREROUTING -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65536 -j DROP
+iptables -t mangle -A PREROUTING -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP
 
 # ponieważ nasz serwer będzie z reguły wystawiał aplikacje poprzez HTTP lub HTTPS możemy ograniczyć ruch do zezwolenia tylko na te porty, dodamy też obostrzenia uniemożliwiające zbyt dużą ilość połączeń
 iptables -N HTTP-RATE-LIMIT
@@ -66,7 +66,7 @@ iptables -A HTTP-RATE-LIMIT -p tcp -m conntrack --ctstate NEW -j DROP
 # wprowadzamy także rate limit dla ilości wysyłanych danych, ponad 150 pakietów na sekundę dla jednego połączenia będzie blokowanych
 iptables -A HTTP-RATE-LIMIT -p tcp -m state --state NEW,RELATED,ESTABLISHED -m limit --limit 150/second --limit-burst 160 -j ACCEPT
 # dodajemy odrzucanie połączeń, które przekroczyły podane limity
-iptables -A HTTP-RATE-LIMIT -p tcp REJECT
+iptables -A HTTP-RATE-LIMIT -p tcp -j REJECT
 
 # dodajemy dropowanie połączeń, których nie “whitelistujemy” nigdzie wyżej
-iptables -A INPUT -p tcp -m state --state NEW DROP
+iptables -A INPUT -p tcp -m state --state NEW -j DROP
