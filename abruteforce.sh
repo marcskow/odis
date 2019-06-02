@@ -15,3 +15,6 @@ iptables -A INPUT -s 185.254.214.200 -p tcp --dport 22 -j ACCEPT
 iptables -A INPUT -p tcp -m tcp --dport 22 -m state --state NEW -m recent --set --name DEFAULT --rsource
 iptables -A INPUT -p tcp -m tcp --dport 22 -m state --state NEW -m recent --update --seconds 180 --hitcount 4 --name DEFAULT --rsource -j DROP
 iptables -A INPUT -p tcp -m state --state NEW --dport 22 -j ACCEPT
+
+# drop any other requests
+iptables -A INPUT -p tcp -m state --state NEW -j DROP
