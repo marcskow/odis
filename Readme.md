@@ -36,8 +36,12 @@ robić sudo bez pytania o hasło. Lub testować na remote na maszynce jako root.
 Wszystkie rule wrzucamy do pliku konfiguracyjnego local.rules. Podmieniamy domyslny plik snort.conf znajdujacym sie pod scieżką /etc/snort/snort.conf plikiem active_firewall/snort.conf (plik konfiguracyjny z zakomentowanymi domyslnymi regulami)
 
 #### Syn Flood
+Przypadek testowy:
 
 HOST 2:
 
+```
 sudo apt install hping3
+
 hping3 -V  -c 1000 -d 100 -S -p 21 --flood $ADRES_HOST_1
+```
