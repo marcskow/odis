@@ -35,5 +35,5 @@ robić sudo bez pytania o hasło. Lub testować na remote na maszynce jako root.
 
 Wszystkie rule wrzucamy do pliku konfiguracyjnego local.rules i uruchamiamy snorta podając do niego ścieżkę:
 
-
+snort -d -l /var/log/snort/ -h 46.101.122.137 -A console -c active_firewall/snort.conf
 
