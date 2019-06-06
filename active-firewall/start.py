@@ -82,6 +82,7 @@ def cleaner():
 
 configurations.append(ActiveFirewallConfiguration("ICMP PING NMAP", "Port scanning detected.", "INPUT -s {} -j DROP"))
 configurations.append(ActiveFirewallConfiguration("Possible TCP DoS", "TCP DoS detected.", "INPUT -s {} -j DROP"))
+configurations.append(ActiveFirewallConfiguration("Ping of Death Detected", "Ping of Death Detected.", "INPUT -s {} -j DROP"))
 
 for stdLine in sys.stdin:
     thread = threading.Thread(target=cleaner, args=())
