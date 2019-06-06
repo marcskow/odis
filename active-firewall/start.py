@@ -8,7 +8,21 @@ import sys
 import threading
 import time
 
+# patterns
+IP_REGEX = r"(\d{1,3}\.){3}\d{1,3}"
+OPTIONAL_PORT_REGEX = r"(:\d{1,5})?"
+IP_PORT_REGEX = IP_REGEX + OPTIONAL_PORT_REGEX
+
+# constants
 ICMP_PING_NMAP_LIFETIME = 5
+
+
+# implementation
+class ActiveFirewallConfiguration:
+    def __init__(self, attack, message, rule):
+        self.attack = attack
+        self.message = message
+        self.rule = rule
 
 
 class IpTablesEntry:
@@ -19,30 +33,38 @@ class IpTablesEntry:
 
 
 entryQueue = queue.Queue()
+configurations = []
+
+
+def source_post_process(source):
+    return re.search(IP_REGEX, source).group()
 
 
 def detect(message):
-    m = re.search(r"([0-9]{1,3}\.){3}[0-9]{1,3} -> ([0-9]{1,3}\.){3}[0-9]{1,3}", message)
+    m = re.search(IP_PORT_REGEX + " -> " + IP_PORT_REGEX, message)
     if m is not None:
         print(m.group())
-        s = m.group()
-        return s.split(" -> ")[0]
+        source = m.group().split(" -> ")[0]
+        pp = source_post_process(source)
+        return pp
 
 
 def process(line):
-    if "ICMP PING NMAP" in line:
+    match = next(config for config in configurations if config.attack in line)
+
+    if match is not None:
         print(line)
-        print("Port scanning detected.")
+        print(match.message)
+
         source = detect(line)
-        print("Attacker address: ")
-        print(source)
 
-        iprule = f"INPUT -s {source} -j DROP"
+        print(f"Attacker address: {source}")
 
-        entryQueue.put(IpTablesEntry(iprule, datetime.datetime.now(), ICMP_PING_NMAP_LIFETIME))
+        rule = match.rule.format(source)
+        entryQueue.put(IpTablesEntry(rule, datetime.datetime.now(), ICMP_PING_NMAP_LIFETIME))
 
-        print(f"Adding /sbin/iptables -A {iprule}")
-        os.system(f"/sbin/iptables -A {iprule}")
+        print(f"Adding /sbin/iptables -A {rule}")
+        os.system(f"/sbin/iptables -A {rule}")
 
 
 def cleaner():
@@ -57,6 +79,10 @@ def cleaner():
                 break
         time.sleep(20)
 
+
+configurations.append(
+    ActiveFirewallConfiguration("ICMP PING NMAP", "Port scanning detected.", "INPUT -s {} -j DROP")
+)
 
 for stdLine in sys.stdin:
     thread = threading.Thread(target=cleaner, args=())
