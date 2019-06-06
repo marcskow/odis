@@ -30,3 +30,10 @@ echo "ICMP PING NMAP [**] [Classification: Attempted Information Leak] [Priority
 
 start.py potrzebuje roota więc albo zalogowani na roota, albo wykminić jak iptables wewnątrz pythona ma
 robić sudo bez pytania o hasło. Lub testować na remote na maszynce jako root.
+
+#### Snortowi podrzucić nasz plik konfiguracyjny
+
+Wszystkie rule wrzucamy do pliku konfiguracyjnego local.rules i uruchamiamy snorta podając do niego ścieżkę:
+
+
+
