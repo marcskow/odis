@@ -31,9 +31,13 @@ echo "ICMP PING NMAP [**] [Classification: Attempted Information Leak] [Priority
 start.py potrzebuje roota więc albo zalogowani na roota, albo wykminić jak iptables wewnątrz pythona ma
 robić sudo bez pytania o hasło. Lub testować na remote na maszynce jako root.
 
-#### Snortowi podrzucić nasz plik konfiguracyjny
+#### Rozwoj aplikacji
 
-Wszystkie rule wrzucamy do pliku konfiguracyjnego local.rules i uruchamiamy snorta podając do niego ścieżkę:
+Wszystkie rule wrzucamy do pliku konfiguracyjnego local.rules. Podmieniamy domyslny plik snort.conf znajdujacym sie pod scieżką /etc/snort/snort.conf plikiem active_firewall/snort.conf (plik konfiguracyjny z zakomentowanymi domyslnymi regulami)
 
-snort -d -l /var/log/snort/ -h 46.101.122.137 -A console -c active_firewall/snort.conf
+#### Syn Flood
 
+HOST 2:
+
+sudo apt install hping3
+hping3 -V  -c 1000 -d 100 -S -p 21 --flood $ADRES_HOST_1
