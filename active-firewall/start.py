@@ -50,7 +50,7 @@ def detect(message):
 
 
 def process(line):
-    match = next(config for config in configurations if config.attack in line)
+    match = next((config for config in configurations if config.attack in line), None)
 
     if match is not None:
         print(line)
