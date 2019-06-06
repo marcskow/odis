@@ -1,0 +1,10 @@
+# $Id: local.rules,v 1.11 2004/07/23 20:15:44 bmc Exp $
+# ----------------
+# LOCAL RULES
+# ----------------
+# This file intentionally does not come with signatures.  Put your local
+# additions here.
+
+alert tcp any any -> $HOME_NET any (flags: S; msg:"Possible TCP DoS"; flow: stateless; detection_filter: track by_dst, count 70, seconds 10; sid:10001;rev:1;)
+
+

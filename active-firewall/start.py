@@ -55,7 +55,7 @@ def cleaner():
             else:
                 entryQueue.put(entry)
                 break
-        time.sleep(5)
+        time.sleep(20)
 
 
 for stdLine in sys.stdin:
