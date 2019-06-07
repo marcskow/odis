@@ -53,3 +53,27 @@ HOST2:
 ```
 hping3 -i u10000 -1 -d 1200  46.101.122.137
 ```
+
+### HTTP Flood
+
+HOST1:
+
+```
+pip install simple_http_server
+
+python -m SimpleHTTPServer 80
+```
+
+HOST2:
+
+```
+git clone https://github.com/TheFox/httpflood.git
+
+sudo apt-get update && apt install cmake && sudo apt-get install build-essential
+
+mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make && make test
+
+./bin/httpflood $HOST_1_IP 80
+
+```
+

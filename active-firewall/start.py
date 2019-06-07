@@ -135,6 +135,12 @@ configurations.append(
         "Ping of Death Detected."
     )
 )
+configurations.append(
+    ActiveFirewallConfiguration(
+        "GET Request flood attempt",
+        "HTTP Flood Detected."
+    )
+)
 
 for stdLine in sys.stdin:
     thread = threading.Thread(target=cleaner, args=())
