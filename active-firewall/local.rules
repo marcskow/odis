@@ -7,4 +7,4 @@
 
 alert tcp any any -> $HOME_NET any (flags: S; msg:"Possible TCP DoS"; flow: stateless; detection_filter: track by_dst, count 70, seconds 10; sid:10001;rev:1;)
 
-
+alert icmp any any -> any any (msg:"Ping of Death Detected"; dsize:>1000; itype:8; icode:0; detection_filter:track by_src, count 30, seconds 1; sid:2000004; classtype:denial-of-service; rev:3;)
