@@ -56,6 +56,8 @@ hping3 -i u10000 -1 -d 1200  46.101.122.137
 
 ### HTTP Flood
 
+Reguła odpali się kiedy podczas 30 sekundowego okresu z jednego adresu IP zostanie wykonanych 30 żądań HTTP.
+
 HOST1:
 
 ```
