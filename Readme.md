@@ -79,3 +79,23 @@ mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make && mak
 
 ```
 
+### Land attack
+
+Land attack occurs when an attack host sends spoofed TCP SYN 
+packets (connection initiation) with the target host's IP address 
+and the TCP port as both source and destination. The reason a 
+Land attack works is because it causes the machine to reply to 
+itself continuously. That is, the target host responds by sending 
+the SYN-ACK packet to itself, creating an empty connection that 
+lasts until the idle timeout value is reached. Flooding a system 
+with such empty connections can overwhelm the system, causing 
+a DoS situation.
+
+HOST1:
+
+```
+python -m SimpleHTTPServer 80
+```
+
+HOST2:
+hping3 -V -c 1000 -d 100 -S -p 80 -s 80 -k -a 46.101.122.137 46.101.122.137

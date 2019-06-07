@@ -10,3 +10,6 @@ alert tcp any any -> $HOME_NET any (flags: S; msg:"Possible TCP DoS"; flow: stat
 alert icmp any any -> any any (msg:"Ping of Death Detected"; dsize:>1000; itype:8; icode:0; detection_filter:track by_src, count 30, seconds 1; sid:2000004; classtype:denial-of-service; rev:3;)
 
 alert tcp any any -> any 80 (content:"HTTP"; msg:"GET Request flood attempt"; detection_filter:track by_src, count 5, seconds 30; metadata: service http; sid:2000006;)
+
+alert tcp any any -> any any (msg: "Land attack detected"; flags:S; sameip; sid: 5000000; rev:1;)
+
