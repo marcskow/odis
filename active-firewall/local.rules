@@ -13,3 +13,6 @@ alert tcp any any -> any 80 (content:"HTTP"; msg:"GET Request flood attempt"; de
 
 alert tcp any any -> any any (msg: "Land attack detected"; flags:S; sameip; sid: 5000000; rev:1;)
 
+alert udp any any -> $HOME_NET any (msg:"UDP flood attack detected"; flow: stateless; detection_filter: track by_dst, count 70, seconds 10 ; sid: 5000003; rev:1;)
+
+

@@ -99,3 +99,20 @@ python -m SimpleHTTPServer 80
 
 HOST2:
 hping3 -V -c 1000 -d 100 -S -p 80 -s 80 -k -a 46.101.122.137 46.101.122.137
+
+### UDP Flood
+
+A UDP flood attack consists into flooding target UDP ports on a 
+victim system with UDP packets. If enough UDP packets are 
+delivered to the destination UDP port, the victim host or UDP 
+application may slow down or go down. 
+
+In an UDP flood attack packet, the source IP address should be set 
+to a spoofed or random IP address. The destination UDP port 
+should be set to a number of an open UDP port in the victim host
+
+HOST2:
+
+```
+hping3 -2 -V -c 1000 -d 100 -S -p 21 --flood 46.101.122.137
+```
