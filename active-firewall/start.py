@@ -4,6 +4,7 @@ import datetime
 import os
 import queue
 import re
+import subprocess
 import sys
 import threading
 import time
@@ -18,7 +19,7 @@ DEFAULT_RULE_LIFETIME = 5
 CLEANER_INTERVAL = 20
 
 
-# implementation
+# data classes
 class Rule:
     def __init__(self, protocol="tcp", lifetime=DEFAULT_RULE_LIFETIME):
         self.protocol = protocol
@@ -43,9 +44,9 @@ class Ip:
 
 
 class ActiveFirewallConfiguration:
-    def __init__(self, attack, message, rule=Rule()):
+    def __init__(self, attack, message=None, rule=Rule()):
         self.attack = attack
-        self.message = message
+        self.message = attack if message is None else message
         self.rule = rule
 
 
@@ -56,18 +57,47 @@ class IpTablesEntry:
         self.lifetime = lifetime
 
 
+# data, attacks configurations
 entryQueue = queue.Queue()
-configurations = []
+configurations = [
+    ActiveFirewallConfiguration(
+        "ICMP PING NMAP",
+        "Port scanning detected.",
+        Rule(protocol="icmp", lifetime=10)
+    ),
+    ActiveFirewallConfiguration(
+        "Possible TCP DoS",
+        "TCP DoS detected."
+    ),
+    ActiveFirewallConfiguration(
+        "Ping of Death Detected"
+    ),
+    ActiveFirewallConfiguration(
+        "Land attack detected"
+    ),
+    ActiveFirewallConfiguration(
+        "GET Request flood attempt"
+    ),
+    ActiveFirewallConfiguration(
+        "UDP flood attack detected"
+    )
+]
 
 
-# def check_if_already_exists(ip):
-#     proc = subprocess.Popen(['iptables-save', 'fake_utility.py'], stdout=subprocess.PIPE)
-#     while True:
-#         line = proc.stdout.readline()
-#         if not line:
-#             break
-#         if ip.port:
-#             re.search()
+# implementation
+def check_if_already_exists(rule, ip):
+    proc = subprocess.Popen(['iptables-save'], stdout=subprocess.PIPE)
+
+    match = False
+    while True:
+        line = proc.stdout.readline()
+        if not line:
+            break
+        match = ((f"-s {ip.address}" in line)
+                 and (f"--dport {ip.port}" in line if ip.port else True)
+                 and (f"-p {rule.protocol}" in line if rule.protocol else True))
+
+    return match
 
 
 def source_post_process(source):
@@ -99,8 +129,9 @@ def process(line):
         rule = match.rule.as_iptables_entry(source)
         entryQueue.put(IpTablesEntry(rule, datetime.datetime.now(), match.rule.lifetime))
 
-        print(f"Adding /sbin/iptables -A {rule}")
-        os.system(f"/sbin/iptables -A {rule}")
+        if not check_if_already_exists(match.rule, source):
+            print(f"Adding /sbin/iptables -A {rule}")
+            os.system(f"/sbin/iptables -A {rule}")
 
 
 def cleaner():
@@ -115,32 +146,6 @@ def cleaner():
                 break
         time.sleep(CLEANER_INTERVAL)
 
-
-configurations.append(
-    ActiveFirewallConfiguration(
-        "ICMP PING NMAP",
-        "Port scanning detected.",
-        Rule(protocol="icmp", lifetime=10)
-    )
-)
-configurations.append(
-    ActiveFirewallConfiguration(
-        "Possible TCP DoS",
-        "TCP DoS detected."
-    )
-)
-configurations.append(
-    ActiveFirewallConfiguration(
-        "Ping of Death Detected",
-        "Ping of Death Detected."
-    )
-)
-configurations.append(
-    ActiveFirewallConfiguration(
-        "GET Request flood attempt",
-        "HTTP Flood Detected."
-    )
-)
 
 for stdLine in sys.stdin:
     thread = threading.Thread(target=cleaner, args=())
