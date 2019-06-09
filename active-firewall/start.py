@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import datetime
+import io
 import os
 import queue
 import re
@@ -89,13 +90,14 @@ def check_if_already_exists(rule, ip):
     proc = subprocess.Popen(['iptables-save'], stdout=subprocess.PIPE)
 
     match = False
-    while True:
-        line = proc.stdout.readline()
+    for line in io.TextIOWrapper(proc.stdout, encoding="utf-8"):
         if not line:
             break
         match = ((f"-s {ip.address}" in line)
                  and (f"--dport {ip.port}" in line if ip.port else True)
                  and (f"-p {rule.protocol}" in line if rule.protocol else True))
+        if match:
+            break
 
     return match
 
@@ -119,12 +121,9 @@ def process(line):
     match = next((config for config in configurations if config.attack in line), None)
 
     if match is not None:
-        print(line)
         print(match.message)
 
         source = detect(line)
-
-        print(f"Attacker address: {source}")
 
         rule = match.rule.as_iptables_entry(source)
         entryQueue.put(IpTablesEntry(rule, datetime.datetime.now(), match.rule.lifetime))
