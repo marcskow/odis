@@ -12,7 +12,7 @@ import time
 
 # patterns
 IP_REGEX = r"(\d{1,3}\.){3}\d{1,3}"
-OPTIONAL_PORT_REGEX = r"(:\d{1,5})?"
+OPTIONAL_PORT_REGEX = r"(:\d{1,5})+"
 IP_PORT_REGEX = IP_REGEX + OPTIONAL_PORT_REGEX
 
 # constants
@@ -59,7 +59,7 @@ class IpTablesEntry:
 
 
 # data, attacks configurations
-entryQueue = queue.Queue()
+entry_queue = queue.Queue()
 configurations = [
     ActiveFirewallConfiguration(
         "ICMP PING NMAP",
@@ -83,6 +83,7 @@ configurations = [
         "UDP flood attack detected"
     )
 ]
+dangerous_ips = {}
 
 
 # implementation
@@ -103,45 +104,59 @@ def check_if_already_exists(rule, ip):
 
 
 def source_post_process(source):
+    print(source)
     ip = re.search(IP_REGEX, source).group()
-    port = re.search(OPTIONAL_PORT_REGEX, source).group().replace(':', '')
+    port = re.search(OPTIONAL_PORT_REGEX, source).group().replace(":", "")
     return Ip(ip, port)
 
 
 def detect(message):
     m = re.search(IP_PORT_REGEX + " -> " + IP_PORT_REGEX, message)
     if m is not None:
-        print(m.group())
         source_destination = m.group().split(" -> ")[0]
         source = source_post_process(source_destination)
         return source
+
+
+def increase_level_of_danger(source):
+    if source.address not in dangerous_ips:
+        dangerous_ips[source.address] = 0
+        return source
+    else:
+        level_of_danger = dangerous_ips[source.address]
+        if level_of_danger > 2:
+            return Ip(source.address, None)
+        else:
+            dangerous_ips[source.address] = dangerous_ips[source.address] + 1
+            return source
 
 
 def process(line):
     match = next((config for config in configurations if config.attack in line), None)
 
     if match is not None:
-        print(match.message)
-
         source = detect(line)
+        source = increase_level_of_danger(source)
 
         rule = match.rule.as_iptables_entry(source)
-        entryQueue.put(IpTablesEntry(rule, datetime.datetime.now(), match.rule.lifetime))
 
         if not check_if_already_exists(match.rule, source):
+            print(match.message)
+            print(line)
             print(f"Adding /sbin/iptables -A {rule}")
+            entry_queue.put(IpTablesEntry(rule, datetime.datetime.now(), match.rule.lifetime))
             os.system(f"/sbin/iptables -A {rule}")
 
 
 def cleaner():
     while True:
-        while not entryQueue.empty():
-            entry = entryQueue.get()
+        while not entry_queue.empty():
+            entry = entry_queue.get()
             if entry.timestamp < datetime.datetime.now() - datetime.timedelta(seconds=entry.lifetime):
                 print(f"Removing /sbin/iptables -D {entry.rule}")
                 os.system(f"/sbin/iptables -D {entry.rule}")
             else:
-                entryQueue.put(entry)
+                entry_queue.put(entry)
                 break
         time.sleep(CLEANER_INTERVAL)
 
