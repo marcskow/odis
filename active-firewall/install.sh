@@ -10,9 +10,9 @@ apt install python3
 
 echo "Installing snort rules and configuration."
 rm /etc/snort/rules/local.rules
-cp ./local.rules /etc/snort/rules/local.rules
+cp ./src/local.rules /etc/snort/rules/local.rules
 
 rm /etc/snort/snort.conf
-cp ./snort.conf /etc/snort/snort.conf
+cp ./src/snort.conf /etc/snort/snort.conf
 
 echo "Installation completed."
