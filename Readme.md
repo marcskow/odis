@@ -1,10 +1,15 @@
-#### Instrukcje
+## User Manual
+1. Pobrać lub sklonować źródła
+2. ```cd /active-firewall```
+3. ```./install.sh```
+4. ```./start.sh <host_ip>```
 
-Droplet IP: 139.59.156.11
+### Testy
+Aby przetestować aplikacje należy dokonać jednego z ataków przedstawionych poniżej w kierunku hosta.
+Spowoduje to dodanie blokujących reguł do iptables, domyślnie pozostaną one blokowane przez około minutę.
+Jeśli atak nadal będzie trwał, atakujący zostanie ponownie zablokowany.
 
-Aby zainstalować snorta (powinno działać, ale nie wiem czy działa):  
-```./active-firewall/install.sh```
-
+### Legacy Docs
 #### Aby przetestować snorta  
 
 HOST 1:
@@ -20,7 +25,10 @@ sudo nmap -v -sT -O 139.59.156.11
 #### Aby przetestować aplikacje
 Uwaga:  
 Narazie nie czyścimy komend, więc poniższy test spowoduje dodanie do iptables drop'a na source IP, lepiej nie podawać swojego bo jak jesteśmy na droplecie
-czy innej maszynce remote to urwie nam połączenie i trzeba będzie zmienić IP, żeby przywrócić
+czy innej maszynce remote to urwie nam połączenie i trzeba będzie zmienić IP, żeby przywrócić  
+
+Update:  
+Już czyścimy komendy
 ```
 touch plik
 echo "Something" >> plik
