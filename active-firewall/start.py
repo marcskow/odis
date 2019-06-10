@@ -123,7 +123,7 @@ def increase_level_of_danger(source):
         return source
     else:
         level_of_danger = dangerous_ips[source.address]
-        if level_of_danger > 2:
+        if level_of_danger >= 2:
             return Ip(source.address, None)
         else:
             dangerous_ips[source.address] = dangerous_ips[source.address] + 1
@@ -134,13 +134,15 @@ def process(line):
     match = next((config for config in configurations if config.attack in line), None)
 
     if match is not None:
-        source = detect(line)
-        source = increase_level_of_danger(source)
+        prev_source = detect(line)
+        source = increase_level_of_danger(prev_source)
 
         rule = match.rule.as_iptables_entry(source)
 
         if not check_if_already_exists(match.rule, source):
             print()
+            if prev_source.port and not source.port:
+                print(f"Danger level too high. Whole Ip will be blocked instead of one port for {source.address}.")
             print(match.message)
             print(f"Adding /sbin/iptables -A {rule}")
             entry_queue.put(IpTablesEntry(rule, datetime.datetime.now(), match.rule.lifetime))
