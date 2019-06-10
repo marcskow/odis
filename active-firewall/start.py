@@ -16,7 +16,7 @@ OPTIONAL_PORT_REGEX = r"(:\d{1,5})+"
 IP_PORT_REGEX = IP_REGEX + OPTIONAL_PORT_REGEX
 
 # constants
-DEFAULT_RULE_LIFETIME = 5
+DEFAULT_RULE_LIFETIME = 10
 CLEANER_INTERVAL = 20
 
 
@@ -95,8 +95,8 @@ def check_if_already_exists(rule, ip):
         if not line:
             break
         match = ((f"-s {ip.address}" in line)
-                 and (f"--dport {ip.port}" in line if ip.port else True)
-                 and (f"-p {rule.protocol}" in line if rule.protocol else True))
+                 and (f"--dport {ip.port}" in line if ip.port else "--dport" not in line)
+                 and (f"-p {rule.protocol}" in line if rule.protocol else "-p" not in line))
         if match:
             break
 
@@ -104,7 +104,6 @@ def check_if_already_exists(rule, ip):
 
 
 def source_post_process(source):
-    print(source)
     ip = re.search(IP_REGEX, source).group()
     port = re.search(OPTIONAL_PORT_REGEX, source).group().replace(":", "")
     return Ip(ip, port)
@@ -141,8 +140,8 @@ def process(line):
         rule = match.rule.as_iptables_entry(source)
 
         if not check_if_already_exists(match.rule, source):
+            print()
             print(match.message)
-            print(line)
             print(f"Adding /sbin/iptables -A {rule}")
             entry_queue.put(IpTablesEntry(rule, datetime.datetime.now(), match.rule.lifetime))
             os.system(f"/sbin/iptables -A {rule}")
