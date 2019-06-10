@@ -16,8 +16,9 @@ OPTIONAL_PORT_REGEX = r"(:\d{1,5})+"
 IP_PORT_REGEX = IP_REGEX + OPTIONAL_PORT_REGEX
 
 # constants
-DEFAULT_RULE_LIFETIME = 10
-CLEANER_INTERVAL = 20
+DEFAULT_RULE_LIFETIME = 60
+PORT_SCANNING_LIFETIME = 30
+CLEANER_INTERVAL = 15
 
 
 # data classes
@@ -64,7 +65,7 @@ configurations = [
     ActiveFirewallConfiguration(
         "ICMP PING NMAP",
         "Port scanning detected.",
-        Rule(protocol="icmp", lifetime=10)
+        Rule(protocol="icmp", lifetime=PORT_SCANNING_LIFETIME)
     ),
     ActiveFirewallConfiguration(
         "Possible TCP DoS",
